@@ -1,0 +1,53 @@
+﻿@page
+@model SocialWebsite.Pages.Login.IndexModel
+@{
+	ViewData["Title"] = "Login";
+}
+
+<h2>Please login here</h2>
+<hr />
+
+@{
+	foreach (string message in Model.SuccessMessages)
+	{
+		<div class="alert alert-success mb-2">
+			<strong>@message</strong>
+		</div>
+	}
+	foreach (string message in Model.ErrorMessages)
+	{
+		<div class="alert alert-danger mb-2">
+			<strong>@message</strong>
+		</div>
+	}
+}
+
+<form method="post" class="d-flex">
+	<div class="card" style="min-width: 400px">
+		<div class="card-body">
+			<p>
+				<label asp-for="LoginDTO.Email"></label>
+				<input class="form-control" asp-for="LoginDTO.Email" />
+				<span class="text-danger" asp-validation-for="LoginDTO.Email"></span>
+			</p>
+			<p>
+				<label asp-for="LoginDTO.Password"></label>
+				<input type="password" class="form-control" asp-for="LoginDTO.Password" />
+				<span class="text-danger" asp-validation-for="LoginDTO.Password"></span>
+			</p>
+			<p>
+				<label asp-for="LoginDTO.RememberMe"></label>
+				<input type="checkbox" asp-for="LoginDTO.RememberMe" />
+			</p>
+		</div>
+		<div class="card-footer">
+			<button class="btn btn-primary">Login</button>
+		</div>
+	</div>
+</form>
+
+@section Scripts {
+	@{
+		<partial name="_ValidationScriptsPartial" />
+	}
+}

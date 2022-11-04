@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using SocialWebsite.Data;
+using SocialWebsite.Services.ManageState;
 
 namespace SocialWebsite.Pages
 {
-    public class IndexModel : PageModel
+    public class IndexModel : StateModel
     {
         private readonly ILogger<IndexModel> _logger;
 
-        public IndexModel(ILogger<IndexModel> logger)
+        public IndexModel(ApplicationDbContext db, ILogger<IndexModel> logger) : base(db)
         {
             _logger = logger;
         }

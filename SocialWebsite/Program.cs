@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SocialWebsite.Data;
+using SocialWebsite.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
     ));
 // Add auto mapper services
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+// Add signalR service
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -36,5 +39,7 @@ app.UseStatusCodePagesWithRedirects("/ErrorPages?statusCode={0}");
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapHub<PostHub>("/hubs/post");
 
 app.Run();

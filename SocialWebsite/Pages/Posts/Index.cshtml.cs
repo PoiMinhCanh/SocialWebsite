@@ -39,9 +39,11 @@ public class IndexModel : StateModel
            .Include(p => p.PostCategory)
            .Include(p => p.User)
            .Where(post => (ActiveCategoryId == null ? true : post.CategoryID == ActiveCategoryId)
+                              && ((IsAuthenticated && MyUser.UserID == post.AuthorID) || post.PublishStatus == true)
                               && (post.Title.Contains(TextSearch)
                               || post.Content.Contains(TextSearch)
-                              || post.User.Fullname.Contains(TextSearch)));
+                              || post.User.Fullname.Contains(TextSearch)))
+           .OrderByDescending(p => p.UpdatedDate);
 
         var pageSize = Configuration.GetValue("PageSize", 4);
 

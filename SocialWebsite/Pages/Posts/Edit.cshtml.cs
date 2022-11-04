@@ -1,79 +1,89 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using SocialWebsite.Data;
+using SocialWebsite.Hubs;
 using SocialWebsite.Models;
+using SocialWebsite.Services.ManageState;
 
-namespace SocialWebsite.Pages.Posts
+namespace SocialWebsite.Pages.Posts;
+
+public class EditModel : StateModel
 {
-    public class EditModel : PageModel
-    {
-        private readonly SocialWebsite.Data.ApplicationDbContext _context;
+    private readonly IHubContext<PostHub> PostHub;
 
-        public EditModel(SocialWebsite.Data.ApplicationDbContext context)
+    public EditModel(ApplicationDbContext db, IHubContext<PostHub> PostHub) : base(db)
+    {
+        this.PostHub = PostHub;
+    }
+
+    [BindProperty]
+    public Post Post { get; set; } = default!;
+
+    public async Task<IActionResult> OnGetAsync(int? id)
+    {
+        if (!IsAuthenticated)
         {
-            _context = context;
+            return Redirect("/Login/Index");
         }
 
-        [BindProperty]
-        public Post Post { get; set; } = default!;
-
-        public async Task<IActionResult> OnGetAsync(int? id)
+        if (id == null || _db.Posts == null)
         {
-            if (id == null || _context.Posts == null)
-            {
-                return NotFound();
-            }
+            return NotFound();
+        }
 
-            var post =  await _context.Posts.FirstOrDefaultAsync(m => m.PostID == id);
-            if (post == null)
-            {
-                return NotFound();
-            }
-            Post = post;
-           ViewData["CategoryID"] = new SelectList(_context.PostCategories, "CategoryID", "CategoryName");
-           ViewData["AuthorID"] = new SelectList(_context.Users, "UserID", "Address");
+        var post =  await _db.Posts.FirstOrDefaultAsync(m => m.PostID == id);
+        if (post == null)
+        {
+            return NotFound();
+        }
+
+        if (!MyUser.UserID.Equals(post.AuthorID))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        Post = post;
+        
+        ViewData["PostCategories"] = new SelectList(_db.PostCategories, "CategoryID", "CategoryName");
+        
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+        if (!ModelState.IsValid)
+        {
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        if (!PostExists(Post.PostID))
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            _context.Attach(Post).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PostExists(Post.PostID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return RedirectToPage("./Index");
+            return NotFound();
         }
 
-        private bool PostExists(int id)
+        if (!MyUser.UserID.Equals(Post.AuthorID))
         {
-          return _context.Posts.Any(e => e.PostID == id);
+            return StatusCode(StatusCodes.Status403Forbidden);
         }
+
+        Post.UpdatedDate = DateTime.Now;
+
+        _db.Update(Post);
+        _db.SaveChanges();
+
+        if (Post.PublishStatus)
+        {
+            await PostHub.Clients.All.SendAsync("Notification", MyUser.Fullname, Post.Title, "update");
+        }
+
+        return RedirectToPage("./Index");
+    }
+
+    private bool PostExists(int id)
+    {
+        return _db.Posts.Any(e => e.PostID == id);
     }
 }

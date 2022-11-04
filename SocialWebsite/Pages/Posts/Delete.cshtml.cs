@@ -1,63 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialWebsite.Data;
 using SocialWebsite.Models;
+using SocialWebsite.Services.ManageState;
+using System.Security.Principal;
 
-namespace SocialWebsite.Pages.Posts
+namespace SocialWebsite.Pages.Posts;
+
+public class DeleteModel : StateModel
 {
-    public class DeleteModel : PageModel
+    public DeleteModel(ApplicationDbContext db) : base(db)
     {
-        private readonly SocialWebsite.Data.ApplicationDbContext _context;
+    }
 
-        public DeleteModel(SocialWebsite.Data.ApplicationDbContext context)
+    [BindProperty]
+  public Post Post { get; set; }
+
+    public async Task<IActionResult> OnGetAsync(int? id)
+    {
+        if (!IsAuthenticated)
         {
-            _context = context;
+            return Redirect("/Login/Index");
         }
 
-        [BindProperty]
-      public Post Post { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        if (id == null || _db.Posts == null)
         {
-            if (id == null || _context.Posts == null)
-            {
-                return NotFound();
-            }
-
-            var post = await _context.Posts.FirstOrDefaultAsync(m => m.PostID == id);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-            else 
-            {
-                Post = post;
-            }
-            return Page();
+            return NotFound();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? id)
+        var post = await _db.Posts
+                            .Include(p => p.PostCategory)
+                            .FirstOrDefaultAsync(m => m.PostID == id);
+
+        if (post == null)
         {
-            if (id == null || _context.Posts == null)
-            {
-                return NotFound();
-            }
-            var post = await _context.Posts.FindAsync(id);
-
-            if (post != null)
-            {
-                Post = post;
-                _context.Posts.Remove(Post);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToPage("./Index");
+            return NotFound();
         }
+
+        if (!MyUser.UserID.Equals(post.AuthorID))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        Post = post;
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync(int? id)
+    {
+      
+        if (id == null || _db.Posts == null)
+        {
+            return NotFound();
+        }
+        var post = await _db.Posts
+                            .FirstOrDefaultAsync(m => m.PostID == id);
+
+        if (post != null)
+        {
+            if (!MyUser.UserID.Equals(post.AuthorID))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden);
+            }
+
+            Post = post;
+            _db.Posts.Remove(Post);
+            await _db.SaveChangesAsync();
+        }
+
+        return RedirectToPage("./Index");
     }
 }

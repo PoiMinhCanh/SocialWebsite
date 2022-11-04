@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SocialWebsite.Model;
+namespace SocialWebsite.Models;
 
 [Table("PostCategory")]
 public class PostCategory

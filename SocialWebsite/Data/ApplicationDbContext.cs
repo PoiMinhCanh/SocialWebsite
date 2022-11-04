@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SocialWebsite.Model;
+using SocialWebsite.Models;
 
 namespace SocialWebsite.Data;   
 

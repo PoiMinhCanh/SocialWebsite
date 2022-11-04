@@ -1,0 +1,100 @@
+﻿@page
+@model SocialWebsite.Pages.Posts.IndexModel
+
+@{
+	ViewData["Title"] = "Home Page";
+}
+
+<h2>Home Page</h2>
+<hr />
+
+<div class="d-flex justify-content-between mb-4">
+	<div class="d-flex" style="gap: 10px">
+	</div>
+	<form class="form-check form-inline d-flex" method="get">
+		<label class="mx-2" for="q">Query: </label>
+		<input class="form-control mr-2" name="q" value="@Model.TextSearch" required />
+		@if (Model.ActiveCategoryId != null)
+		{
+			<input type="hidden" name="categoryId" value="@Model.ActiveCategoryId" />
+		}
+		<input class="btn btn-primary" type="submit" value="Search" />
+	</form>
+</div>
+
+<div class="row">
+	<div class="col-sm-3">
+		<div class="d-flex flex-column">
+			<h4>Category</h4>
+			<a class="font-weight-bold @(Model.ActiveCategoryId == null ? "bg-danger" : "bg-info") text-white text-decoration-none p-2"
+			   asp-route-q="@Model.TextSearch">All</a>
+
+			@foreach (var category in Model.Categories)
+			{
+				<a class="font-weight-bold @(Model.ActiveCategoryId == category.CategoryID ? "bg-danger" : "bg-info") text-white text-decoration-none p-2"
+			   asp-route-categoryId="@category.CategoryID"
+			   asp-route-q="@Model.TextSearch">@category.CategoryName</a>
+			}
+		</div>
+	</div>
+	<div class="col-sm-9">
+		<div class="d-flex">
+			<h4>List Post</h4>
+		</div>
+		@if (Model.Posts != null && Model.Posts.Count > 0)
+		{
+			<div>
+				@foreach (var item in Model.Posts)
+				{
+					<div class="card text-center mb-4">
+						<div class="card-header bg-info">
+							@item.User.Fullname
+						</div>
+						<div class="card-body">
+							<h5 class="card-title">@item.Title</h5>
+							<p class="card-text">@item.Content</p>
+						</div>
+						<div class="card-footer">
+							@item.PostCategory.CategoryName
+						</div>
+						<div class="card-footer">
+							@item.PostCategory.CategoryName
+						</div>
+						<div class="card-footer text-muted">
+							@item.UpdatedDate
+						</div>
+						@if (Model.IsAuthenticated && Model.MyUser.UserID.Equals(item.User.UserID))
+						{
+							<div class="card-footer text-muted">
+								<a asp-page="./Edit" asp-route-id="@item.PostID">Edit</a> |
+								<a asp-page="./Delete" asp-route-id="@item.PostID">Delete</a>
+							</div>
+						}
+					</div>
+				}
+				@{
+					var prevDisabled = !Model.Posts.HasPreviousPage ? "disabled" : "";
+					var nextDisabled = !Model.Posts.HasNextPage ? "disabled" : "";
+				}
+
+				<a asp-page="./Index"
+			   asp-route-pageIndex="@(Model.Posts.PageIndex - 1)"
+			   class="btn btn-primary @prevDisabled">
+					Previous
+				</a>
+
+				<a asp-page="./Index"
+			   asp-route-pageIndex="@(Model.Posts.PageIndex + 1)"
+			   class="btn btn-primary @nextDisabled">
+					Next
+				</a>
+			</div>
+		}
+		else
+		{
+			<div class="text-center">
+				<p class="text-danger">No have data.</p>
+			</div>
+		}
+	</div>
+</div>

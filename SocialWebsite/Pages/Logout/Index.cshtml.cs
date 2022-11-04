@@ -9,6 +9,6 @@ public class IndexModel : PageModel
     {
         HttpContext.Response.Cookies.Delete("id");
 
-        return Redirect("/Index");
+        return Redirect("/");
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SocialWebsite.Data;
-using SocialWebsite.Model;
+using SocialWebsite.Models;
 
 namespace SocialWebsite.Services.ManageState;
 
@@ -9,7 +9,7 @@ public class StateModel : PageModel
 {
     protected readonly ApplicationDbContext _db;
 
-    public User User { get; private set; }
+    public User MyUser { get; private set; }
     public bool IsAuthenticated { get; private set; }
 
     public List<string> SuccessMessages = new List<string>();
@@ -48,13 +48,13 @@ public class StateModel : PageModel
         // not have id in cookie
         if (id == null)
         {
-            User = null;
+            MyUser = null;
             IsAuthenticated = false;
             return;
-        } 
+        }
 
         // get user
-        User = _db.Users.SingleOrDefault(user => user.UserID.ToString().Equals(id));
+        MyUser = _db.Users.SingleOrDefault(user => user.UserID.ToString().Equals(id));
 
         if (User == null)
         {

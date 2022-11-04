@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SocialWebsite.Model;
+namespace SocialWebsite.Models;
 
 [Table("Post")]
 public class Post
@@ -22,12 +22,13 @@ public class Post
     public string Content { get; set; }
 
     [Required]
+    [Display(Name = "Publish")]
     public bool PublishStatus { get; set; }
 
     [Required]
-    public DateTime CreatedDate { get; set; } 
-    
-    public DateTime UpdatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+    public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
     // Relationship
     public PostCategory PostCategory { get; set; }

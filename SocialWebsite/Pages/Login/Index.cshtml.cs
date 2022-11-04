@@ -1,8 +1,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SocialWebsite.Data;
-using SocialWebsite.Model;
-using SocialWebsite.Model.DTO;
+using SocialWebsite.Models;
+using SocialWebsite.Models.DTO;
 using SocialWebsite.Services.ManageState;
 
 namespace SocialWebsite.Pages.Login;
@@ -50,6 +50,6 @@ public class IndexModel : StateModel
 
         HttpContext.Response.Cookies.Append("id", user.UserID.ToString(), cookieOptions);
 
-        return Redirect("Index");
+        return Redirect("/");
     }
 }

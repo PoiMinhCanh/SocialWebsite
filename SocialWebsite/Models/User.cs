@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SocialWebsite.Model;
+namespace SocialWebsite.Models;
 
 /* The Entity Framework Core IndexAttribute was introduced in .NET 5 
     * and is used to create a database index on the column mapped to the specified entity property

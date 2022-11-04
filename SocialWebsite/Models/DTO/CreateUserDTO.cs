@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SocialWebsite.Model.DTO;
+namespace SocialWebsite.Models.DTO;
 
 public class CreateUserDTO
 {
